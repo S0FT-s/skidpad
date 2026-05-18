@@ -47,8 +47,8 @@ void skidpad_node::SplitLineSender(CarData carData){
         // if(map[i].x < carData.car_x && map[i].y < carData.car_y)//Corrigir 
         //     continue;
         
-        if(dist > 100){
-            //RCLCPP_INFO(this->get_logger(), "Enviar");
+        if(dist > 10000){
+            RCLCPP_INFO(this->get_logger(), "Enviar");
             path_control_pub->publish(pathSpline_msg);
             path_vis_pub->publish(path_rviz_msg);
             break;
@@ -82,6 +82,9 @@ void skidpad_node::SplitLineSender(CarData carData){
                 path_rviz_msg.poses.push_back(pose);
                 dist += d;
                 pathSpline_msg.distance.push_back(dist);
+                if(pathSpline_msg.poses.size() >= 40){
+                    break;
+                }
             }
         }
     }
@@ -135,7 +138,8 @@ void skidpad_node::coneArrayCallback(const lart_msgs::msg::ConeArray::SharedPtr 
                         dist_b = tmp_distance_blue;
                         blue_index = i;
                     }
-                }else if (cones_s[i].YELLOW == 1){
+                }
+                if (cones_s[i].YELLOW == 1){
                     tmp_distance_yellow = distance(cones_s[i].position.x, cones_s[i].position.y, 0, 0);
                     if (tmp_distance_yellow < dist_y){
                         dist_y = tmp_distance_yellow;
