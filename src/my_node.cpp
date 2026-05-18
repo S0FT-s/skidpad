@@ -107,8 +107,11 @@ void skidpad_node::positionCallback(const geometry_msgs::msg::PoseStamped::Share
     tf2::Matrix3x3 m(q);
     m.getRPY(carData.roll, carData.pitch, carData.yaw);
     
-
-    SplitLineSender(carData);
+    if(map_Localized){
+        SplitLineSender(carData);
+    }else{
+        RCLCPP_INFO(this->get_logger(), "Map is not localized");
+    }
 }
 
 
@@ -116,6 +119,8 @@ void skidpad_node::coneArrayCallback(const lart_msgs::msg::ConeArray::SharedPtr 
 {
     auto cones_s = msg->cones;
     if(!map_Localized){
+        RCLCPP_INFO(this->get_logger(), "Trying to localize the car");
+
         double dist_b = std::numeric_limits<double>::max();
         double dist_y = std::numeric_limits<double>::max();
         int blue_index = -1;
@@ -141,6 +146,7 @@ void skidpad_node::coneArrayCallback(const lart_msgs::msg::ConeArray::SharedPtr 
         if (blue_index != -1 && yellow_index != -1) 
         {
             map_localizer(msg,blue_index,yellow_index,&map);
+            map_Localized = !map_Localized;
         }
     }
 }
