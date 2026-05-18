@@ -9,6 +9,5 @@ geometry_msgs::msg::PoseStamped createPoseMsg(
     double roll, double pitch, double yaw, 
     const rclcpp::Time& stamp);
 
-std::vector<PathStruct> map_localizer(const lart_msgs::msg::ConeArray::SharedPtr msg);
-
+void map_localizer(const lart_msgs::msg::ConeArray::SharedPtr msg, int blue_index,int yellow_index, std::vector<PathStruct> *map);
 std::vector<PathStruct> file_loader(std::string fileName);

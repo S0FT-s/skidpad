@@ -29,16 +29,36 @@ geometry_msgs::msg::PoseStamped createPoseMsg(
     }
 
 
-std::vector<PathStruct> map_localizer(const lart_msgs::msg::ConeArray::SharedPtr msg){
+void map_localizer(const lart_msgs::msg::ConeArray::SharedPtr msg, int blue_index,int yellow_index, std::vector<PathStruct> *map){
+    auto cones_s = msg->cones;
+    std::vector<PathStruct> temp_map = *map;
 
-    
+    //calcula o ponto medio
+    double bx = cones_s[blue_index].position.x;
+    double by = cones_s[blue_index].position.y;
+    double yx = cones_s[yellow_index].position.x;
+    double yy = cones_s[yellow_index].position.y;
 
+    double tx = (bx + yx) / 2.0;
+    double ty = (by + yy) / 2.0;
 
+    //Calcular a Rotação Inicial (tr)
+    // Na Formula Student: Azul é Esquerda, Amarelo é Direita.
+    // O vetor vai do Azul para o Amarelo. Queremos a perpendicular (frente).
+    double tr = atan2(yy - by, yx - bx) + (M_PI / 2.0); 
 
+    double cos_tr = std::cos(tr);
+    double sin_tr = std::sin(tr);
 
+    for(PathStruct path : temp_map){
+        double original_x = path.x;
+
+        path.x = original_x * cos_tr - path.y * sin_tr+tx;
+        path.y = original_x * sin_tr + path.y * cos_tr+ty;
+    }
+
+    *map = temp_map;
 }
-
-
 
 std::vector<PathStruct> file_loader(std::string fileName){
     std::ifstream File(fileName);
